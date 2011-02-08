@@ -42,9 +42,9 @@
 
 (function($) {
 
-var defaultNodeComparator = function(node1,node2) {
-	var text1 = node1.text(),
-	    text2 = node2.text();
+var defaultNodeComparator = function(node1, node2) {
+	var text1 = $(node1).text(),
+	    text2 = $(node2).text();
 	return text1 == text2 ? 0 : (text1 < text2 ? -1 : 1);
 };
 
@@ -378,18 +378,22 @@ $.widget("ui.multiselect", {
 		var that = this;
 		// do this async so the browser actually display the waiting message
 		setTimeout(function() {
-			$(options.each(function(i) {
+			// Detach the lists from the DOM beause we are going to append alot of things
+			that.selectedList.detach();
+			that.availableList.detach();
+			options.each(function( i ) {
 				var list = (this.selected ? that.selectedList : that.availableList);
-		      var item = that._getOptionNode(this).show();
+				var item = that._getOptionNode(this);
 				that._applyItemState(item, this.selected);
 				item.data('multiselect.idx', i);
 
 				// cache
 				list.data('multiselect.cache')[item.data('multiselect.optionLink').val()] = item;
-
 				that._insertToList(item, list);
-		    }));
-		
+			});
+			that.selectedContainer.append(that.selectedList);
+			that.availableContainer.append(that.selectedList);
+
 			// update count
 			that._setBusy(false);
 			that._updateCount();
@@ -443,9 +447,8 @@ $.widget("ui.multiselect", {
 	},
 	_getOptionNode: function(option) {
 		option = $(option);
-		var node = $('<li class="ui-state-default ui-element"><span class="ui-icon"/>'+option.text()+'<a href="#" class="ui-state-default action"><span class="ui-corner-all ui-icon"/></a></li>').hide();
-		node.data('multiselect.optionLink', option);
-		return node;
+		return  $('<li class="ui-state-default ui-element"><span class="ui-icon"/>'+option.text()+'<a href="#" class="ui-state-default action"><span class="ui-corner-all ui-icon"/></a></li>')
+			.data('multiselect.optionLink', option);
 	},
 	_moveOptionNode: function(item) {
 		// call this async to let the item be placed correctly
