@@ -40,39 +40,13 @@
  *  Default callbacks
  ********************************/
 
-// expect data to be "val1=text1[\nval2=text2[\n...]]"
-var defaultDataParser = function(data) {
-	if ( typeof data == 'string' ) {
-		var pattern = /^(\s\n\r\t)*\+?$/;
-		var selected, line, lines = data.split(/\n/);
-		data = {};
-		for (var i in lines) {
-			line = lines[i].split("=");
-			// make sure the key is not empty
-			if (!pattern.test(line[0])) {
-				selected = (line[0].lastIndexOf('+') == line.length - 1);
-				if (selected) line[0] = line.substr(0,line.length-1);
-				// if no value is specified, default to the key value
-				data[line[0]] = {
-					selected: false,
-					value: line[1] || line[0]
-				};
-			}
-		}
-	} else {
-		this._messages($.ui.multiselect.constante.MESSAGE_ERROR, $.ui.multiselect.locale.errorDataFormat);
-		data = false;
-	}
-	return data;
-};
+(function($) {
 
 var defaultNodeComparator = function(node1,node2) {
 	var text1 = node1.text(),
 	    text2 = node2.text();
 	return text1 == text2 ? 0 : (text1 < text2 ? -1 : 1);
 };
-
-(function($) {
 
 $.widget("ui.multiselect", {
   options: {
@@ -91,7 +65,7 @@ $.widget("ui.multiselect", {
 		// ui
 		dividerLocation: 0.6,
 		// callbacks
-		dataParser: defaultDataParser,
+		dataParser: $.parseJSON,
 		nodeComparator: defaultNodeComparator,
 		nodeInserted: null
 	},
